@@ -11,6 +11,7 @@ module com.wafflepanel.wafflepanel {
 
     requires org.jsoup;
     requires rkon.core;
+    requires org.json;
 
     opens com.wafflepanel.wafflepanel to javafx.fxml;
     exports com.wafflepanel.wafflepanel;
