@@ -16,6 +16,7 @@ public class HelloController {
     @FXML
     protected void onHelloButtonClick() throws IOException, AuthenticationException {
         Document doc = Jsoup.connect("https://en.wikipedia.org/").get();
+
         System.out.println(doc.title());
 
     }
