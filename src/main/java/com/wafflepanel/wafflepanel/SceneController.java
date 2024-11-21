@@ -1,5 +1,6 @@
 package com.wafflepanel.wafflepanel;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import net.kronos.rkon.core.ex.AuthenticationException;
@@ -25,10 +26,16 @@ public class SceneController {
 
 
 
-        String command = "notepad.exe";
+        String command = "%installdir%/WafflePanel.jar";
+
+        Platform.exit();
+        System.out.println("awd");
+
 
         // Execute the command
         Process process = Runtime.getRuntime().exec(command);
+
+        //System.exit(0);
 
 
 

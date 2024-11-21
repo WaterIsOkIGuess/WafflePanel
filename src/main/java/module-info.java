@@ -12,7 +12,10 @@ module com.wafflepanel.wafflepanel {
     requires org.jsoup;
     requires rkon.core;
     requires org.json;
+    requires java.logging;
 
     opens com.wafflepanel.wafflepanel to javafx.fxml;
     exports com.wafflepanel.wafflepanel;
+    exports WafflePanelUpdater;
+    opens WafflePanelUpdater to javafx.fxml;
 }
