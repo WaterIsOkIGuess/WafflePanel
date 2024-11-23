@@ -2,18 +2,17 @@ package WafflePanelUpdater;
 
 import com.wafflepanel.wafflepanel.MainSceneBuilder;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import org.json.JSONException;
-import org.json.JSONObject;
+import net.kronos.rkon.core.ex.AuthenticationException;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.Charset;
+import java.io.IOException;
 
 public class PanelUpdaterBuilder extends Application {
 
@@ -23,21 +22,56 @@ public class PanelUpdaterBuilder extends Application {
     public void start(Stage stage) throws Exception {
 
         fxmlLoader = new FXMLLoader(MainSceneBuilder.class.getResource("PanelUpdater.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1280, 720);
+        Scene scene = new Scene(fxmlLoader.load(), 600, 400);
         stage.setTitle("Waffle Panel");
         stage.setResizable(false);
         stage.getIcons().add(new Image(MainSceneBuilder.class.getResourceAsStream("Molly.png")));
         stage.setScene(scene);
         stage.show();
 
+        //Thread downloadStart = new Thread(new updaterRun());
+        //downloadStart.start();
+
+        PanelUpdaterController.updateDownload();
 
 
 
-        //Parent root = fxmlLoader.load();
+        ProgressBar progressBar = (ProgressBar) PanelUpdaterBuilder.fxmlLoader.getNamespace().get("progressBar");
+        Label statusLabel = (Label) PanelUpdaterBuilder.fxmlLoader.getNamespace().get("statusLabel");
+
+        statusLabel.setText("Downloading...");
+
+        delay(4000, () -> statusLabel.setText("Unpacking..."));
+        delay(4000, () -> progressBar.setProgress(0.25));
+
+
+        delay(8000, () -> statusLabel.setText("Installing..."));
+        delay(8000, () -> progressBar.setProgress(0.5));
+
+
+        delay(12000, () -> statusLabel.setText("Cleaning up..."));
+        delay(12000, () -> progressBar.setProgress(0.75));
+
+        String command;
+        delay(16000, this::endUpdate);
+
+
+
+
+
+
+
+        //statusLabel.setText("Updater finished.");
+
+
+
+
+
+                //Parent root = fxmlLoader.load();
         //ProgressBar progressBar = (ProgressBar) fxmlLoader.getNamespace().get("progressBar");
         //progressBar.setProgress(0.25);
 
-        PanelUpdaterController.changeProgressBar();
+
 
         //Thread update = new Thread(new PanelUpdaterController());
         //update.start();
@@ -62,30 +96,37 @@ public class PanelUpdaterBuilder extends Application {
   */
     }
 
-
-
-    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
-        InputStream is = new URL(url).openStream();
+    public void endUpdate() {
+        Platform.exit();
+        String command = "java -jar " + System.getProperty("user.dir") + "\\WafflePanel.jar";
         try {
-            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
-            String jsonText = readAll(rd);
-            JSONObject json = new JSONObject(jsonText);
-            return json;
-        } finally {
-            is.close();
+            Process process = Runtime.getRuntime().exec(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        System.exit(0);
     }
 
-    private static String readAll(Reader rd) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        int cp;
-        while ((cp = rd.read()) != -1) {
-            sb.append((char) cp);
-        }
-        return sb.toString();
+
+    public static void delay(long millis, Runnable continuation) {
+        Task<Void> sleeper = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try { Thread.sleep(millis); }
+                catch (InterruptedException e) { }
+                return null;
+            }
+        };
+        sleeper.setOnSucceeded(event -> continuation.run());
+        new Thread(sleeper).start();
     }
+
+
+
+
 
     public static void main(String[] args) {
+        //PanelUpdaterController.changeProgressBar();
         launch();
         //System.out.println("end");
 

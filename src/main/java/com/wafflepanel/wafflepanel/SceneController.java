@@ -15,37 +15,39 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SceneController {
     @FXML
     private Label welcomeText;
 
     @FXML
-    protected void onHelloButtonClick() throws IOException, AuthenticationException {
-        //Document doc = Jsoup.connect("https://api.github.com/repos/WaterIsOkIGuess/WafflePanel/releases/latest").get();
+    protected void onHelloButtonClick() throws IOException {
 
 
 
-        String command = "%installdir%/WafflePanel.jar";
 
+
+
+
+
+        String command = "java -jar " + System.getProperty("user.dir") + "\\PanelUpdater.jar";
         Platform.exit();
-        System.out.println("awd");
+        try {
+
+            Process process = Runtime.getRuntime().exec(command);
+
+        } catch (IOException e) {
+            Main.writeToLogger(e.toString());
+        }
+        System.exit(0);
 
 
-        // Execute the command
-        Process process = Runtime.getRuntime().exec(command);
 
-        //System.exit(0);
-
-
-
-
-
-        //System.out.println(download_url);
-
-        //System.out.println(doc.title());
 
     }
+
 
 
 

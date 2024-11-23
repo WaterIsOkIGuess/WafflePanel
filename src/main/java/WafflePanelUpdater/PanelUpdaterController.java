@@ -1,90 +1,61 @@
 package WafflePanelUpdater;
 
-import com.wafflepanel.wafflepanel.MainSceneBuilder;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import net.kronos.rkon.core.ex.AuthenticationException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.io.*;
+import java.net.URL;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.charset.Charset;
 
 public class PanelUpdaterController {
 
 
-    //public static Object changeProgressBar;
 
     @FXML
-    protected static void changeProgressBar() throws IOException, AuthenticationException {
-        //Document doc = Jsoup.connect("https://api.github.com/repos/WaterIsOkIGuess/WafflePanel/releases/latest").get();
-        ProgressBar progressBar = (ProgressBar) PanelUpdaterBuilder.fxmlLoader.getNamespace().get("progressBar");
+    protected static void updateDownload() throws IOException, AuthenticationException {
 
-        Timer timer = new Timer();
+        JSONObject json = readJsonFromUrl("https://api.github.com/repos/WaterIsOkIGuess/WafflePanel/releases/latest");
 
-        TimerTask appDownload = new TimerTask() {
-            @Override
-            public void run() {
-                progressBar.setProgress(0.25);
-            }
-        };
-
-        TimerTask appUnpacking = new TimerTask() {
-            @Override
-            public void run() {
-                progressBar.setProgress(0.5);
-            }
-        };
-
-        TimerTask appInstalling = new TimerTask() {
-            @Override
-            public void run() {
-                progressBar.setProgress(0.75);
-            }
-        };
-
-        TimerTask updaterClose = new TimerTask() {
-            @Override
-            public void run() {
-                Platform.exit();
-                System.out.println("awd");
-                System.exit(0);
-
-            }
-        };
+        String download_url = json.getJSONArray("assets").getJSONObject(1).getString("browser_download_url");
+        String fileName = "WafflePanel.jar";
 
 
-        timer.schedule(appDownload, 5000);
-        timer.schedule(appUnpacking, 10000);
-        timer.schedule(appInstalling, 15000);
-        timer.schedule(updaterClose, 20000);
-
-
-
-
-
-        //String command = "notepad.exe";
-
-        // Execute the command
-        //Process process = Runtime.getRuntime().exec(command);
-
-
-
-
-
-        //System.out.println(download_url);
-
-        //System.out.println(doc.title());
-
+        URL url = new URL(download_url);
+        ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+        FileChannel fileChannel = fileOutputStream.getChannel();
+        fileChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
     }
 
-    public static void update() {
-        //FXMLLoader fxmlLoader = new FXMLLoader(MainSceneBuilder.class.getResource("PanelUpdater.fxml"));
-        //Parent root = null;
 
 
+    public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+        InputStream is = new URL(url).openStream();
+        try {
+            BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));
+            String jsonText = readAll(rd);
+            JSONObject json = new JSONObject(jsonText);
+            return json;
+        } finally {
+            is.close();
+        }
+    }
+
+    private static String readAll(Reader rd) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int cp;
+        while ((cp = rd.read()) != -1) {
+            sb.append((char) cp);
+        }
+        return sb.toString();
     }
 
 
